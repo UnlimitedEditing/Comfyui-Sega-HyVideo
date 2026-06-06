@@ -219,7 +219,7 @@ cfg = {
         ),
         "peak_vram_usage": 0,   # fill after first successful run
         "requirements": {
-            "github": ["https://github.com/UnlimitedEditing/comfyui-sega-hyvideo"],
+            "github": ["https://github.com/UnlimitedEditing/Comfyui-Sega-HyVideo"],
             "pip":    [],
         },
         "field_mapping": [
