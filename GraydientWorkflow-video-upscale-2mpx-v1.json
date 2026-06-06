@@ -1,0 +1,37 @@
+{
+  "graydient_workflow": {
+    "version": 1,
+    "description": "GAN upscale to 2Mpx (1920\u00d71080). Input is force-resized to 480\u00d7270 before the 4\u00d7 GAN pass, so per-frame cost is constant regardless of source resolution. ~160s for 400 frames on RTX 4090. Chain with video-frameboost AFTER this for frame doubling.",
+    "peak_vram_usage": 0,
+    "requirements": {
+      "github": [
+        "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite"
+      ],
+      "pip": []
+    },
+    "field_mapping": [
+      {
+        "local_field": "init_image_url",
+        "node_id": 1,
+        "node_input_name": "video",
+        "node_name": "VHS_LoadVideoUpload",
+        "default_value": "",
+        "help_text": "Reply to a Graydient-generated video"
+      },
+      {
+        "local_field": "fps",
+        "node_id": 4,
+        "node_input_name": "frame_rate",
+        "node_name": "VHS_VideoCombine",
+        "default_value": 24,
+        "help_text": "Output playback fps. Match your source video fps."
+      }
+    ],
+    "workflow": "{\n  \"last_node_id\": 4,\n  \"last_link_id\": 3,\n  \"nodes\": [\n    {\n      \"id\": 1,\n      \"type\": \"VHS_LoadVideoUpload\",\n      \"pos\": [\n        80,\n        80\n      ],\n      \"size\": {\n        \"0\": 460,\n        \"1\": 240\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"IMAGE\",\n          \"type\": \"IMAGE\",\n          \"links\": [\n            1\n          ],\n          \"slot_index\": 0\n        },\n        {\n          \"name\": \"frame_count\",\n          \"type\": \"INT\",\n          \"links\": [],\n          \"slot_index\": 1\n        },\n        {\n          \"name\": \"audio\",\n          \"type\": \"AUDIO\",\n          \"links\": [],\n          \"slot_index\": 2\n        },\n        {\n          \"name\": \"video_info\",\n          \"type\": \"VHS_VIDEOINFO\",\n          \"links\": [],\n          \"slot_index\": 3\n        }\n      ],\n      \"widgets_values\": [\n        \"\",\n        0,\n        \"Custom\",\n        480,\n        270,\n        0,\n        0,\n        1\n      ]\n    },\n    {\n      \"id\": 2,\n      \"type\": \"UpscaleModelLoader\",\n      \"pos\": [\n        80,\n        380\n      ],\n      \"size\": {\n        \"0\": 320,\n        \"1\": 60\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"UPSCALE_MODEL\",\n          \"type\": \"UPSCALE_MODEL\",\n          \"links\": [\n            2\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        \"4x-ClearRealityV1.pth\"\n      ]\n    },\n    {\n      \"id\": 3,\n      \"type\": \"ImageUpscaleWithModel\",\n      \"pos\": [\n        640,\n        160\n      ],\n      \"size\": {\n        \"0\": 320,\n        \"1\": 80\n      },\n      \"inputs\": [\n        {\n          \"name\": \"upscale_model\",\n          \"type\": \"UPSCALE_MODEL\",\n          \"link\": 2\n        },\n        {\n          \"name\": \"image\",\n          \"type\": \"IMAGE\",\n          \"link\": 1\n        }\n      ],\n      \"outputs\": [\n        {\n          \"name\": \"IMAGE\",\n          \"type\": \"IMAGE\",\n          \"links\": [\n            3\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": []\n    },\n    {\n      \"id\": 4,\n      \"type\": \"VHS_VideoCombine\",\n      \"pos\": [\n        1060,\n        160\n      ],\n      \"size\": {\n        \"0\": 340,\n        \"1\": 200\n      },\n      \"inputs\": [\n        {\n          \"name\": \"images\",\n          \"type\": \"IMAGE\",\n          \"link\": 3\n        }\n      ],\n      \"outputs\": [],\n      \"widgets_values\": [\n        24,\n        0,\n        \"2mpx_upscale\",\n        \"video/h264-mp4\",\n        false,\n        true\n      ]\n    }\n  ],\n  \"links\": [\n    [\n      1,\n      1,\n      0,\n      3,\n      1,\n      \"IMAGE\"\n    ],\n    [\n      2,\n      2,\n      0,\n      3,\n      0,\n      \"UPSCALE_MODEL\"\n    ],\n    [\n      3,\n      3,\n      0,\n      4,\n      0,\n      \"IMAGE\"\n    ]\n  ],\n  \"groups\": [],\n  \"config\": {},\n  \"extra\": {},\n  \"version\": 0.4\n}",
+    "workflow_2": "{\n  \"1\": {\n    \"inputs\": {\n      \"video\": \"\",\n      \"force_rate\": 0,\n      \"force_size\": \"Custom\",\n      \"custom_width\": 480,\n      \"custom_height\": 270,\n      \"frame_load_cap\": 0,\n      \"skip_first_frames\": 0,\n      \"select_every_nth\": 1\n    },\n    \"class_type\": \"VHS_LoadVideoUpload\"\n  },\n  \"2\": {\n    \"inputs\": {\n      \"model_name\": \"4x-ClearRealityV1.pth\"\n    },\n    \"class_type\": \"UpscaleModelLoader\"\n  },\n  \"3\": {\n    \"inputs\": {\n      \"upscale_model\": [\n        \"2\",\n        0\n      ],\n      \"image\": [\n        \"1\",\n        0\n      ]\n    },\n    \"class_type\": \"ImageUpscaleWithModel\"\n  },\n  \"4\": {\n    \"inputs\": {\n      \"images\": [\n        \"3\",\n        0\n      ],\n      \"frame_rate\": 24,\n      \"loop_count\": 0,\n      \"filename_prefix\": \"2mpx_upscale\",\n      \"format\": \"video/h264-mp4\",\n      \"pingpong\": false,\n      \"save_output\": true\n    },\n    \"class_type\": \"VHS_VideoCombine\"\n  }\n}",
+    "supports_img2img": false,
+    "supports_txt2img": false,
+    "install_detected_nodes": true,
+    "is_public": false
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "graydient_workflow": {
+    "version": 1,
+    "description": "RIFE frame interpolation \u2014 2\u00d7 or 4\u00d7 frame count. Works at any resolution. ~35s for 400 frames at 1080p (2\u00d7). Chain AFTER video-upscale-2mpx for best results. Set fps to source_fps \u00d7 multiplier (e.g. 24fps + 2x = 48fps).",
+    "peak_vram_usage": 0,
+    "requirements": {
+      "github": [
+        "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite",
+        "https://github.com/Fannovel16/ComfyUI-Frame-Interpolation"
+      ],
+      "pip": []
+    },
+    "field_mapping": [
+      {
+        "local_field": "init_image_url",
+        "node_id": 1,
+        "node_input_name": "video",
+        "node_name": "VHS_LoadVideoUpload",
+        "default_value": "",
+        "help_text": "Reply to any Graydient video. Works at any resolution."
+      },
+      {
+        "local_field": "fps",
+        "node_id": 3,
+        "node_input_name": "frame_rate",
+        "node_name": "VHS_VideoCombine",
+        "default_value": 48,
+        "help_text": "OUTPUT playback fps. Set to source_fps \u00d7 multiplier. 24fps source + 2x RIFE = 48. 24fps source + 4x RIFE = 96."
+      },
+      {
+        "local_field": "slot1",
+        "node_id": 2,
+        "node_input_name": "multiplier",
+        "node_name": "RIFE VFI",
+        "default_value": 2,
+        "help_text": "Frame count multiplier: 2 or 4. Budget: 2x=~35s, 4x=~65s for 400 frames."
+      }
+    ],
+    "workflow": "{\n  \"last_node_id\": 3,\n  \"last_link_id\": 2,\n  \"nodes\": [\n    {\n      \"id\": 1,\n      \"type\": \"VHS_LoadVideoUpload\",\n      \"pos\": [\n        80,\n        80\n      ],\n      \"size\": {\n        \"0\": 460,\n        \"1\": 240\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"IMAGE\",\n          \"type\": \"IMAGE\",\n          \"links\": [\n            1\n          ],\n          \"slot_index\": 0\n        },\n        {\n          \"name\": \"frame_count\",\n          \"type\": \"INT\",\n          \"links\": [],\n          \"slot_index\": 1\n        },\n        {\n          \"name\": \"audio\",\n          \"type\": \"AUDIO\",\n          \"links\": [],\n          \"slot_index\": 2\n        },\n        {\n          \"name\": \"video_info\",\n          \"type\": \"VHS_VIDEOINFO\",\n          \"links\": [],\n          \"slot_index\": 3\n        }\n      ],\n      \"widgets_values\": [\n        \"\",\n        0,\n        \"Disabled\",\n        512,\n        512,\n        0,\n        0,\n        1\n      ]\n    },\n    {\n      \"id\": 2,\n      \"type\": \"RIFE VFI\",\n      \"pos\": [\n        640,\n        80\n      ],\n      \"size\": {\n        \"0\": 360,\n        \"1\": 180\n      },\n      \"inputs\": [\n        {\n          \"name\": \"frames\",\n          \"type\": \"IMAGE\",\n          \"link\": 1\n        }\n      ],\n      \"outputs\": [\n        {\n          \"name\": \"IMAGE\",\n          \"type\": \"IMAGE\",\n          \"links\": [\n            2\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        \"rife47.pth\",\n        10,\n        2,\n        true,\n        true,\n        1.0\n      ]\n    },\n    {\n      \"id\": 3,\n      \"type\": \"VHS_VideoCombine\",\n      \"pos\": [\n        1060,\n        80\n      ],\n      \"size\": {\n        \"0\": 340,\n        \"1\": 200\n      },\n      \"inputs\": [\n        {\n          \"name\": \"images\",\n          \"type\": \"IMAGE\",\n          \"link\": 2\n        }\n      ],\n      \"outputs\": [],\n      \"widgets_values\": [\n        48,\n        0,\n        \"frameboost\",\n        \"video/h264-mp4\",\n        false,\n        true\n      ]\n    }\n  ],\n  \"links\": [\n    [\n      1,\n      1,\n      0,\n      2,\n      0,\n      \"IMAGE\"\n    ],\n    [\n      2,\n      2,\n      0,\n      3,\n      0,\n      \"IMAGE\"\n    ]\n  ],\n  \"groups\": [],\n  \"config\": {},\n  \"extra\": {},\n  \"version\": 0.4\n}",
+    "workflow_2": "{\n  \"1\": {\n    \"inputs\": {\n      \"video\": \"\",\n      \"force_rate\": 0,\n      \"force_size\": \"Disabled\",\n      \"custom_width\": 512,\n      \"custom_height\": 512,\n      \"frame_load_cap\": 0,\n      \"skip_first_frames\": 0,\n      \"select_every_nth\": 1\n    },\n    \"class_type\": \"VHS_LoadVideoUpload\"\n  },\n  \"2\": {\n    \"inputs\": {\n      \"ckpt_name\": \"rife47.pth\",\n      \"frames\": [\n        \"1\",\n        0\n      ],\n      \"clear_cache_after_n_frames\": 10,\n      \"multiplier\": 2,\n      \"fast_mode\": true,\n      \"ensemble\": true,\n      \"scale_factor\": 1.0\n    },\n    \"class_type\": \"RIFE VFI\"\n  },\n  \"3\": {\n    \"inputs\": {\n      \"images\": [\n        \"2\",\n        0\n      ],\n      \"frame_rate\": 48,\n      \"loop_count\": 0,\n      \"filename_prefix\": \"frameboost\",\n      \"format\": \"video/h264-mp4\",\n      \"pingpong\": false,\n      \"save_output\": true\n    },\n    \"class_type\": \"VHS_VideoCombine\"\n  }\n}",
+    "supports_img2img": false,
+    "supports_txt2img": false,
+    "install_detected_nodes": true,
+    "is_public": false
+  }
+}
