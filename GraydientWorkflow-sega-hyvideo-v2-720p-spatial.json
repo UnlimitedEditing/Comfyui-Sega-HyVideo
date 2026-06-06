@@ -1,0 +1,96 @@
+{
+  "graydient_workflow": {
+    "version": 1,
+    "description": "FastHunyuan 720p (GGUF Q8_0) + SEGA spatial extrapolation: 1920\u00d71088 @ 25 frames. Spatial RoPE extrapolated 1.5\u00d7 beyond training (720p\u21921080p). Temporal axis unchanged. Tiled VAE decode for 1080p output.",
+    "peak_vram_usage": 0,
+    "requirements": {
+      "github": [
+        "https://github.com/UnlimitedEditing/Comfyui-Sega-HyVideo",
+        "https://github.com/city96/ComfyUI-GGUF",
+        "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite"
+      ],
+      "pip": []
+    },
+    "field_mapping": [
+      {
+        "local_field": "prompt",
+        "node_id": 5,
+        "node_input_name": "text",
+        "node_name": "CLIPTextEncode (positive)",
+        "default_value": "A cinematic shot, ultra high resolution, photorealistic"
+      },
+      {
+        "local_field": "negative_prompt",
+        "node_id": 6,
+        "node_input_name": "text",
+        "node_name": "CLIPTextEncode (negative)",
+        "default_value": "text, watermark, low quality, blurry, distorted, artifacts"
+      },
+      {
+        "local_field": "seed",
+        "node_id": 8,
+        "node_input_name": "seed",
+        "node_name": "KSampler",
+        "default_value": 12345
+      },
+      {
+        "local_field": "steps",
+        "node_id": 8,
+        "node_input_name": "steps",
+        "node_name": "KSampler",
+        "default_value": 30
+      },
+      {
+        "local_field": "guidance",
+        "node_id": 8,
+        "node_input_name": "cfg",
+        "node_name": "KSampler",
+        "default_value": 6.0
+      },
+      {
+        "local_field": "strength",
+        "node_id": 8,
+        "node_input_name": "denoise",
+        "node_name": "KSampler",
+        "default_value": 1.0
+      },
+      {
+        "local_field": "size",
+        "node_id": 7,
+        "node_input_name": "width",
+        "node_name": "EmptyHunyuanLatentVideo",
+        "default_value": 1920,
+        "help_text": "Training default: 1280. 1920 = 1.5\u00d7 SEGA. Max safe: ~2048 on 24GB."
+      },
+      {
+        "local_field": "size",
+        "node_id": 7,
+        "node_input_name": "height",
+        "node_name": "EmptyHunyuanLatentVideo",
+        "default_value": 1088,
+        "help_text": "Training default: 720. 1080 = 1.5\u00d7 SEGA. Max safe: ~1152 on 24GB."
+      },
+      {
+        "local_field": "length",
+        "node_id": 7,
+        "node_input_name": "length",
+        "node_name": "EmptyHunyuanLatentVideo",
+        "default_value": 25,
+        "help_text": "Keep at 25 (training default). Temporal SEGA is disabled."
+      },
+      {
+        "local_field": "fps",
+        "node_id": 11,
+        "node_input_name": "frame_rate",
+        "node_name": "VHS_VideoCombine",
+        "default_value": 24
+      }
+    ],
+    "workflow": "{\n  \"last_node_id\": 11,\n  \"last_link_id\": 12,\n  \"nodes\": [\n    {\n      \"id\": 1,\n      \"type\": \"UnetLoaderGGUF\",\n      \"pos\": [\n        80,\n        80\n      ],\n      \"size\": {\n        \"0\": 460,\n        \"1\": 80\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"MODEL\",\n          \"type\": \"MODEL\",\n          \"links\": [\n            1\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        \"fast-hunyuan-video-t2v-720p-Q8_0.gguf\"\n      ]\n    },\n    {\n      \"id\": 2,\n      \"type\": \"HunyuanVideoSEGAConfig\",\n      \"pos\": [\n        80,\n        210\n      ],\n      \"size\": {\n        \"0\": 460,\n        \"1\": 480\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"SEGA_HYVIDEO_CONFIG\",\n          \"type\": \"SEGA_HYVIDEO_CONFIG\",\n          \"links\": [\n            2\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        720,\n        1280,\n        7,\n        0.15,\n        1.5,\n        1.0,\n        \"power_res\",\n        0.08,\n        0.0,\n        1.0,\n        1.5,\n        0.0,\n        true\n      ]\n    },\n    {\n      \"id\": 3,\n      \"type\": \"HunyuanVideoSEGAPatch\",\n      \"pos\": [\n        640,\n        160\n      ],\n      \"size\": {\n        \"0\": 300,\n        \"1\": 80\n      },\n      \"inputs\": [\n        {\n          \"name\": \"model\",\n          \"type\": \"MODEL\",\n          \"link\": 1\n        },\n        {\n          \"name\": \"sega_config\",\n          \"type\": \"SEGA_HYVIDEO_CONFIG\",\n          \"link\": 2\n        }\n      ],\n      \"outputs\": [\n        {\n          \"name\": \"model\",\n          \"type\": \"MODEL\",\n          \"links\": [\n            3\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": []\n    },\n    {\n      \"id\": 4,\n      \"type\": \"DualCLIPLoaderGGUF\",\n      \"pos\": [\n        80,\n        760\n      ],\n      \"size\": {\n        \"0\": 460,\n        \"1\": 100\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"CLIP\",\n          \"type\": \"CLIP\",\n          \"links\": [\n            4,\n            5\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        \"clip_l.safetensors\",\n        \"llava-llama-3-8b-v1_1.Q4_0.gguf\",\n        \"hunyuan_video\"\n      ]\n    },\n    {\n      \"id\": 5,\n      \"type\": \"CLIPTextEncode\",\n      \"pos\": [\n        640,\n        300\n      ],\n      \"size\": {\n        \"0\": 440,\n        \"1\": 160\n      },\n      \"inputs\": [\n        {\n          \"name\": \"clip\",\n          \"type\": \"CLIP\",\n          \"link\": 4\n        }\n      ],\n      \"outputs\": [\n        {\n          \"name\": \"CONDITIONING\",\n          \"type\": \"CONDITIONING\",\n          \"links\": [\n            6\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        \"A cinematic shot, ultra high resolution, photorealistic\"\n      ]\n    },\n    {\n      \"id\": 6,\n      \"type\": \"CLIPTextEncode\",\n      \"pos\": [\n        640,\n        500\n      ],\n      \"size\": {\n        \"0\": 440,\n        \"1\": 160\n      },\n      \"inputs\": [\n        {\n          \"name\": \"clip\",\n          \"type\": \"CLIP\",\n          \"link\": 5\n        }\n      ],\n      \"outputs\": [\n        {\n          \"name\": \"CONDITIONING\",\n          \"type\": \"CONDITIONING\",\n          \"links\": [\n            7\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        \"text, watermark, low quality, blurry, distorted, artifacts\"\n      ]\n    },\n    {\n      \"id\": 7,\n      \"type\": \"EmptyHunyuanLatentVideo\",\n      \"pos\": [\n        640,\n        700\n      ],\n      \"size\": {\n        \"0\": 320,\n        \"1\": 120\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"LATENT\",\n          \"type\": \"LATENT\",\n          \"links\": [\n            8\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        1920,\n        1088,\n        25,\n        1\n      ]\n    },\n    {\n      \"id\": 8,\n      \"type\": \"KSampler\",\n      \"pos\": [\n        1060,\n        260\n      ],\n      \"size\": {\n        \"0\": 320,\n        \"1\": 280\n      },\n      \"inputs\": [\n        {\n          \"name\": \"model\",\n          \"type\": \"MODEL\",\n          \"link\": 3\n        },\n        {\n          \"name\": \"positive\",\n          \"type\": \"CONDITIONING\",\n          \"link\": 6\n        },\n        {\n          \"name\": \"negative\",\n          \"type\": \"CONDITIONING\",\n          \"link\": 7\n        },\n        {\n          \"name\": \"latent_image\",\n          \"type\": \"LATENT\",\n          \"link\": 8\n        }\n      ],\n      \"outputs\": [\n        {\n          \"name\": \"LATENT\",\n          \"type\": \"LATENT\",\n          \"links\": [\n            9\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        12345,\n        \"randomize\",\n        30,\n        6.0,\n        \"euler\",\n        \"sgm_uniform\",\n        1.0\n      ]\n    },\n    {\n      \"id\": 9,\n      \"type\": \"VAELoader\",\n      \"pos\": [\n        80,\n        940\n      ],\n      \"size\": {\n        \"0\": 460,\n        \"1\": 80\n      },\n      \"inputs\": [],\n      \"outputs\": [\n        {\n          \"name\": \"VAE\",\n          \"type\": \"VAE\",\n          \"links\": [\n            10\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        \"hunyuan_video_vae_bf16.safetensors\"\n      ]\n    },\n    {\n      \"id\": 10,\n      \"type\": \"VAEDecodeTiled\",\n      \"pos\": [\n        1460,\n        260\n      ],\n      \"size\": {\n        \"0\": 320,\n        \"1\": 120\n      },\n      \"inputs\": [\n        {\n          \"name\": \"samples\",\n          \"type\": \"LATENT\",\n          \"link\": 9\n        },\n        {\n          \"name\": \"vae\",\n          \"type\": \"VAE\",\n          \"link\": 10\n        }\n      ],\n      \"outputs\": [\n        {\n          \"name\": \"IMAGE\",\n          \"type\": \"IMAGE\",\n          \"links\": [\n            11\n          ],\n          \"slot_index\": 0\n        }\n      ],\n      \"widgets_values\": [\n        256,\n        64,\n        64,\n        8\n      ]\n    },\n    {\n      \"id\": 11,\n      \"type\": \"VHS_VideoCombine\",\n      \"pos\": [\n        1860,\n        260\n      ],\n      \"size\": {\n        \"0\": 340,\n        \"1\": 200\n      },\n      \"inputs\": [\n        {\n          \"name\": \"images\",\n          \"type\": \"IMAGE\",\n          \"link\": 11\n        }\n      ],\n      \"outputs\": [],\n      \"widgets_values\": [\n        24,\n        0,\n        \"SEGA_720p_spatial\",\n        \"video/h264-mp4\",\n        false,\n        true\n      ]\n    }\n  ],\n  \"links\": [\n    [\n      1,\n      1,\n      0,\n      3,\n      0,\n      \"MODEL\"\n    ],\n    [\n      2,\n      2,\n      0,\n      3,\n      1,\n      \"SEGA_HYVIDEO_CONFIG\"\n    ],\n    [\n      3,\n      3,\n      0,\n      8,\n      0,\n      \"MODEL\"\n    ],\n    [\n      4,\n      4,\n      0,\n      5,\n      0,\n      \"CLIP\"\n    ],\n    [\n      5,\n      4,\n      0,\n      6,\n      0,\n      \"CLIP\"\n    ],\n    [\n      6,\n      5,\n      0,\n      8,\n      1,\n      \"CONDITIONING\"\n    ],\n    [\n      7,\n      6,\n      0,\n      8,\n      2,\n      \"CONDITIONING\"\n    ],\n    [\n      8,\n      7,\n      0,\n      8,\n      3,\n      \"LATENT\"\n    ],\n    [\n      9,\n      8,\n      0,\n      10,\n      0,\n      \"LATENT\"\n    ],\n    [\n      10,\n      9,\n      0,\n      10,\n      1,\n      \"VAE\"\n    ],\n    [\n      11,\n      10,\n      0,\n      11,\n      0,\n      \"IMAGE\"\n    ]\n  ],\n  \"groups\": [],\n  \"config\": {},\n  \"extra\": {},\n  \"version\": 0.4\n}",
+    "workflow_2": "{\n  \"1\": {\n    \"inputs\": {\n      \"unet_name\": \"fast-hunyuan-video-t2v-720p-Q8_0.gguf\"\n    },\n    \"class_type\": \"UnetLoaderGGUF\"\n  },\n  \"2\": {\n    \"inputs\": {\n      \"training_height\": 720,\n      \"training_width\": 1280,\n      \"training_t_len\": 7,\n      \"mscale_alpha\": 0.15,\n      \"mscale_beta\": 1.5,\n      \"mscale_min\": 1.0,\n      \"base_mscale_formula\": \"power_res\",\n      \"base_mscale_coefficient\": 0.08,\n      \"spread_min\": 0.0,\n      \"spread_max\": 1.0,\n      \"spread_alpha\": 1.5,\n      \"temporal_sega_strength\": 0.0,\n      \"spectral_enabled\": true\n    },\n    \"class_type\": \"HunyuanVideoSEGAConfig\"\n  },\n  \"3\": {\n    \"inputs\": {\n      \"model\": [\n        \"1\",\n        0\n      ],\n      \"sega_config\": [\n        \"2\",\n        0\n      ]\n    },\n    \"class_type\": \"HunyuanVideoSEGAPatch\"\n  },\n  \"4\": {\n    \"inputs\": {\n      \"clip_name1\": \"clip_l.safetensors\",\n      \"clip_name2\": \"llava-llama-3-8b-v1_1.Q4_0.gguf\",\n      \"type\": \"hunyuan_video\"\n    },\n    \"class_type\": \"DualCLIPLoaderGGUF\"\n  },\n  \"5\": {\n    \"inputs\": {\n      \"text\": \"A cinematic shot, ultra high resolution, photorealistic\",\n      \"clip\": [\n        \"4\",\n        0\n      ]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"6\": {\n    \"inputs\": {\n      \"text\": \"text, watermark, low quality, blurry, distorted, artifacts\",\n      \"clip\": [\n        \"4\",\n        0\n      ]\n    },\n    \"class_type\": \"CLIPTextEncode\"\n  },\n  \"7\": {\n    \"inputs\": {\n      \"width\": 1920,\n      \"height\": 1088,\n      \"length\": 25,\n      \"batch_size\": 1\n    },\n    \"class_type\": \"EmptyHunyuanLatentVideo\"\n  },\n  \"8\": {\n    \"inputs\": {\n      \"seed\": 12345,\n      \"steps\": 30,\n      \"cfg\": 6.0,\n      \"sampler_name\": \"euler\",\n      \"scheduler\": \"sgm_uniform\",\n      \"denoise\": 1.0,\n      \"model\": [\n        \"3\",\n        0\n      ],\n      \"positive\": [\n        \"5\",\n        0\n      ],\n      \"negative\": [\n        \"6\",\n        0\n      ],\n      \"latent_image\": [\n        \"7\",\n        0\n      ]\n    },\n    \"class_type\": \"KSampler\"\n  },\n  \"9\": {\n    \"inputs\": {\n      \"vae_name\": \"hunyuan_video_vae_bf16.safetensors\"\n    },\n    \"class_type\": \"VAELoader\"\n  },\n  \"10\": {\n    \"inputs\": {\n      \"samples\": [\n        \"8\",\n        0\n      ],\n      \"vae\": [\n        \"9\",\n        0\n      ],\n      \"tile_size\": 256,\n      \"overlap\": 64,\n      \"temporal_size\": 64,\n      \"temporal_overlap\": 8\n    },\n    \"class_type\": \"VAEDecodeTiled\"\n  },\n  \"11\": {\n    \"inputs\": {\n      \"images\": [\n        \"10\",\n        0\n      ],\n      \"frame_rate\": 24,\n      \"loop_count\": 0,\n      \"filename_prefix\": \"SEGA_720p_spatial\",\n      \"format\": \"video/h264-mp4\",\n      \"pingpong\": false,\n      \"save_output\": true\n    },\n    \"class_type\": \"VHS_VideoCombine\"\n  }\n}",
+    "supports_img2img": false,
+    "supports_txt2img": true,
+    "install_detected_nodes": true,
+    "is_public": false
+  }
+}
