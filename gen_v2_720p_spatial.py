@@ -38,8 +38,8 @@ import json
 # ── Target ─────────────────────────────────────────────────────────────────
 TARGET_HEIGHT = 1088   # 1088 = 68×16 — HunyuanVideo requires height % 16 == 0
 TARGET_WIDTH  = 1920   # 1920 = 120×16 — valid
-TARGET_FRAMES = 25
-TARGET_FPS    = 24
+TARGET_FRAMES = 17     # 17 → latent t_len=5 (vs training 7) — reduces tokens/step ~29%
+TARGET_FPS    = 24     # NOTE: fps only affects output playback speed, not generation time
 
 # ── Training reference for SEGA ────────────────────────────────────────────
 # HunyuanVideo 720p defaults: 1280×720, 25 frames
@@ -146,7 +146,7 @@ standard = {
             ],
             "outputs": [{"name": "LATENT", "type": "LATENT", "links": [9], "slot_index": 0}],
             # seed, seed_mode, steps, cfg, sampler, scheduler, denoise
-            "widgets_values": [12345, "randomize", 30, 6.0, "euler", "sgm_uniform", 1.0],
+            "widgets_values": [12345, "randomize", 20, 6.0, "euler", "sgm_uniform", 1.0],
         },
         # 9 — Load VAE
         {
@@ -259,7 +259,7 @@ api = {
     "8": {
         "inputs": {
             "seed":         12345,
-            "steps":        30,
+            "steps":        20,
             "cfg":          6.0,
             "sampler_name": "euler",
             "scheduler":    "sgm_uniform",
@@ -307,12 +307,12 @@ field_mapping = [
     {"local_field": "prompt",          "node_id": 5,  "node_input_name": "text",       "node_name": "CLIPTextEncode (positive)", "default_value": "A cinematic shot, ultra high resolution, photorealistic"},
     {"local_field": "negative_prompt", "node_id": 6,  "node_input_name": "text",       "node_name": "CLIPTextEncode (negative)", "default_value": "text, watermark, low quality, blurry, distorted, artifacts"},
     {"local_field": "seed",            "node_id": 8,  "node_input_name": "seed",       "node_name": "KSampler",                  "default_value": 12345},
-    {"local_field": "steps",           "node_id": 8,  "node_input_name": "steps",      "node_name": "KSampler",                  "default_value": 30},
+    {"local_field": "steps",           "node_id": 8,  "node_input_name": "steps",      "node_name": "KSampler",                  "default_value": 20},
     {"local_field": "guidance",        "node_id": 8,  "node_input_name": "cfg",        "node_name": "KSampler",                  "default_value": 6.0},
     {"local_field": "strength",        "node_id": 8,  "node_input_name": "denoise",    "node_name": "KSampler",                  "default_value": 1.0},
     {"local_field": "size",            "node_id": 7,  "node_input_name": "width",      "node_name": "EmptyHunyuanLatentVideo",   "default_value": TARGET_WIDTH,  "help_text": "Training default: 1280. 1920 = 1.5× SEGA. Max safe: ~2048 on 24GB."},
     {"local_field": "size",            "node_id": 7,  "node_input_name": "height",     "node_name": "EmptyHunyuanLatentVideo",   "default_value": TARGET_HEIGHT, "help_text": "Training default: 720. 1080 = 1.5× SEGA. Max safe: ~1152 on 24GB."},
-    {"local_field": "length",          "node_id": 7,  "node_input_name": "length",     "node_name": "EmptyHunyuanLatentVideo",   "default_value": TARGET_FRAMES, "help_text": "Keep at 25 (training default). Temporal SEGA is disabled."},
+    {"local_field": "length",          "node_id": 7,  "node_input_name": "length",     "node_name": "EmptyHunyuanLatentVideo",   "default_value": TARGET_FRAMES, "help_text": "17 frames (5 latent t_len). Reduces per-step compute ~50% vs 25 frames at 1080p. Must be (4k+1): 13, 17, 21, 25..."},
     {"local_field": "fps",             "node_id": 11, "node_input_name": "frame_rate", "node_name": "VHS_VideoCombine",          "default_value": TARGET_FPS},
 ]
 
